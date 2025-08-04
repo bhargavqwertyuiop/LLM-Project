@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # Ollama service for local LLM models
+  ollama:
+    image: ollama/ollama:latest
+    container_name: documind-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_ORIGINS=*
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and task queue
+  redis:
+    image: redis:7-alpine
+    container_name: documind-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: documind-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./.env:/app/.env
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///./documind.db
+    depends_on:
+      - ollama
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: documind-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Model initializer (runs once to pull required models)
+  model-init:
+    image: ollama/ollama:latest
+    container_name: documind-model-init
+    depends_on:
+      - ollama
+    command: >
+      sh -c "
+        echo 'Waiting for Ollama to be ready...' &&
+        for i in {1..30}; do
+          if curl -f http://ollama:11434/api/tags 2>/dev/null; then
+            echo 'Ollama is ready!'
+            break
+          fi
+          echo 'Waiting for Ollama... attempt $$i/30'
+          sleep 10
+        done &&
+        echo 'Pulling required models...' &&
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"llama2:7b\"}' -H 'Content-Type: application/json' &&
+        echo 'Llama2 model pull initiated...' &&
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"mistral:7b\"}' -H 'Content-Type: application/json' &&
+        echo 'Mistral model pull initiated...' &&
+        echo 'Model initialization complete!'
+      "
+    restart: "no"
+
+volumes:
+  ollama_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    name: documind-network

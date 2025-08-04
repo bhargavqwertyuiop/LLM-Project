@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Override backend for easier debugging
+  backend:
+    environment:
+      - DEBUG=True
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend:/app/backend
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+  # Override frontend for development
+  frontend:
+    restart: unless-stopped
+
+  # Make Ollama more accessible for debugging
+  ollama:
+    environment:
+      - OLLAMA_DEBUG=1
+    restart: unless-stopped
+
+  # Skip model initialization for faster startup (uncomment if needed)
+  # model-init:
+  #   command: >
+  #     sh -c "echo 'Skipping model initialization for development'"
