@@ -6,13 +6,16 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --production
+# Install dependencies (including dev dependencies for build)
+RUN npm install
 
 # Copy source code
 COPY src/ ./src/
 COPY public/ ./public/
 COPY tsconfig.json ./
+
+# Create missing public assets if they don't exist
+RUN touch public/favicon.ico || true
 
 # Build the application
 RUN npm run build
