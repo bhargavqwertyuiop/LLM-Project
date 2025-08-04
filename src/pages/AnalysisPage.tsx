@@ -377,11 +377,12 @@ const AnalysisPage: React.FC = () => {
             {/* Analyze Button */}
             <Button
               variant="contained"
-              size="large"
+              size="medium"
               startIcon={loading ? <CircularProgress size={20} /> : <Analytics />}
               onClick={handleTextAnalysis}
               disabled={loading || !textInput.trim()}
               fullWidth
+              sx={{ py: 1.5, fontSize: '1.1rem' }}
             >
               {loading ? 'Analyzing...' : 'Analyze Text'}
             </Button>

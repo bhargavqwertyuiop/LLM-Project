@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
       chips: ['Ollama', 'Hugging Face', 'Transformers'],
     },
     {
-      icon: <Speed sx={{ fontSize: 48, color: 'success.main' }} />,
+      icon: <Speed sx={{ fontSize: 48, color: 'green' }} />,
       title: 'Real-time Processing',
       description: 'Fast document processing and instant AI insights',
       chips: ['Real-time', 'Async', 'Scalable'],
@@ -80,21 +80,21 @@ const HomePage: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Button
             variant="contained"
-            size="large"
+            size="medium"
             component={Link}
             to="/analysis"
             startIcon={<Analytics />}
-            sx={{ px: 4, py: 1.5 }}
+            sx={{ px: 4, py: 1.5, fontSize: '1.1rem' }}
           >
             Start Analysis
           </Button>
           <Button
             variant="outlined"
-            size="large"
+            size="medium"
             component={Link}
             to="/compare"
             startIcon={<Compare />}
-            sx={{ px: 4, py: 1.5 }}
+            sx={{ px: 4, py: 1.5, fontSize: '1.1rem' }}
           >
             Compare Documents
           </Button>

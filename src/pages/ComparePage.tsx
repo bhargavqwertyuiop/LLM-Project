@@ -204,14 +204,15 @@ const ComparePage: React.FC = () => {
 
             <Divider sx={{ my: 3 }} />
 
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={loading ? <CircularProgress size={20} /> : <Compare />}
-              onClick={handleCompare}
-              disabled={loading || texts.filter(t => t.trim()).length < 2}
-              fullWidth
-            >
+                         <Button
+               variant="contained"
+               size="medium"
+               startIcon={loading ? <CircularProgress size={20} /> : <Compare />}
+               onClick={handleCompare}
+               disabled={loading || texts.filter(t => t.trim()).length < 2}
+               fullWidth
+               sx={{ py: 1.5, fontSize: '1.1rem' }}
+             >
               {loading ? 'Comparing...' : 'Compare Texts'}
             </Button>
           </Paper>
@@ -276,7 +277,7 @@ const ComparePage: React.FC = () => {
                             label={`Average Similarity: ${(results.average_similarity * 100).toFixed(1)}%`}
                             color={getSimilarityColor(results.average_similarity)}
                             variant="filled"
-                            size="large"
+                            sx={{ fontSize: '1rem', py: 1, px: 2 }}
                           />
                         </Box>
                       )}
